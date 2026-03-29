@@ -6,7 +6,7 @@ services:
     plan: starter
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn --bind 0.0.0.0:$PORT --timeout 600 api.server:app
-    healthCheckPath: /api/health
+    healthCheckPath: /health
     autoDeploy: true
     envVars:
       - key: PYTHON_VERSION
