@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: heart-disease-prediction
+    env: python
+    rootDir: .
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --bind 0.0.0.0:$PORT --timeout 600 api.server:app
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.6

@@ -1,15 +1,16 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory, abort
 from flask_cors import CORS
 import pandas as pd
 import numpy as np
 import json
 import os
 
-app = Flask(__name__)
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+app = Flask(__name__, static_folder=project_root)
 CORS(app)
 
 # Load CSV data
-data_path = os.path.join(os.path.dirname(__file__), '..', 'heart_disease_selected_features.csv')
+data_path = os.path.join(project_root, 'heart_disease_selected_features.csv')
 df = pd.read_csv(data_path)
 
 # Calculate statistics from CSV data
@@ -27,6 +28,16 @@ csv_stats = {
 def health():
     """Health check endpoint"""
     return jsonify({'status': 'ok', 'message': 'API is running'})
+
+@app.route('/health', methods=['GET'])
+def health_alias():
+    """Simple health alias for platform checks."""
+    return jsonify({'status': 'ok', 'message': 'API is running'})
+
+@app.route('/')
+def serve_home():
+    """Serve the web app entry point."""
+    return send_from_directory(project_root, 'index.html')
 
 @app.route('/api/data-info', methods=['GET'])
 def data_info():
@@ -242,10 +253,22 @@ def get_feature_ranges():
     
     return jsonify(ranges), 200
 
+@app.route('/<path:path>')
+def serve_static(path):
+    """Serve static assets and standalone HTML pages from project root."""
+    if path.startswith('api/'):
+        abort(404)
+
+    requested_path = os.path.join(project_root, path)
+    if os.path.exists(requested_path) and os.path.isfile(requested_path):
+        return send_from_directory(project_root, path)
+
+    return send_from_directory(project_root, 'index.html')
+
 if __name__ == '__main__':
     print("Starting Flask API Server...")
     print("CSV Data Loaded:")
     print(f"  - Total Records: {len(df)}")
     print(f"  - Features: {list(df.columns)}")
     print(f"  - Disease Distribution: {df['target'].value_counts().to_dict()}")
-    app.run(debug=True, port=5000)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=False)
