@@ -4,8 +4,8 @@ services:
     env: python
     rootDir: .
     plan: starter
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn --bind 0.0.0.0:$PORT --timeout 600 api.server:app
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: gunicorn --bind 0.0.0.0:$PORT --timeout 600 wsgi:app
     healthCheckPath: /health
     autoDeploy: true
     envVars:
