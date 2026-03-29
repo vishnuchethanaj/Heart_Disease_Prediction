@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CardioAI Project Details</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body {
+            background:
+                radial-gradient(circle at 80% 35%, rgba(31, 95, 207, 0.18) 0%, rgba(31, 95, 207, 0) 45%),
+                linear-gradient(90deg, rgba(247, 250, 255, 0.98) 0%, rgba(230, 240, 250, 0.78) 55%, rgba(204, 223, 243, 0.38) 100%);
+        }
+
+        .details-wrap {
+            max-width: 1240px;
+            margin: 2rem auto;
+            padding: 0 1rem 2rem;
+        }
+
+        .details-topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .details-title {
+            color: var(--text-primary);
+            margin: 0;
+            font-size: 1.2rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="details-wrap">
+        <div class="details-topbar">
+            <h1 class="details-title"><i class="fas fa-circle-info"></i> Learn More - Project Overview</h1>
+            <a href="index.html" class="btn btn-primary">Back To Home</a>
+        </div>
+
+        <section class="workflow" id="workflow" aria-label="Project overview">
+            <h3><i class="fas fa-diagram-project"></i> How This Project Works</h3>
+            <p class="workflow-intro">
+                CardioAI is an end-to-end heart disease risk prediction web application combining structured clinical input,
+                ANN-based risk inference, explainable feature importance, and a user-friendly visual dashboard.
+            </p>
+
+            <div class="workflow-steps">
+                <div class="workflow-step">
+                    <i class="fas fa-user-check"></i>
+                    <h4>1. Clinical Data Input</h4>
+                    <p>Collects key patient indicators like age, blood pressure, cholesterol, fasting blood sugar, and max heart rate through validated form controls.</p>
+                </div>
+                <div class="workflow-arrow"><i class="fas fa-arrow-right"></i></div>
+                <div class="workflow-step">
+                    <i class="fas fa-sliders-h"></i>
+                    <h4>2. Feature Processing</h4>
+                    <p>Normalizes and validates selected medical features aligned with your curated dataset for consistent prediction quality.</p>
+                </div>
+                <div class="workflow-arrow"><i class="fas fa-arrow-right"></i></div>
+                <div class="workflow-step">
+                    <i class="fas fa-brain"></i>
+                    <h4>3. ANN Risk Inference</h4>
+                    <p>Backend prediction engine computes probability of disease, confidence score, and interpretable feature contribution values.</p>
+                </div>
+            </div>
+
+            <div class="workflow-details-grid">
+                <article class="workflow-detail-card">
+                    <h5><i class="fas fa-server"></i> Technology Stack</h5>
+                    <ul>
+                        <li>Frontend: HTML, CSS, JavaScript, Chart.js</li>
+                        <li>Backend: Flask REST API</li>
+                        <li>Data Source: Heart disease selected feature dataset</li>
+                        <li>Model Logic: ANN-inspired risk scoring and explainability output</li>
+                    </ul>
+                </article>
+                <article class="workflow-detail-card">
+                    <h5><i class="fas fa-chart-line"></i> Output You Get</h5>
+                    <ul>
+                        <li>Risk percentage with low/medium/high categorization</li>
+                        <li>Probability distribution and confidence score</li>
+                        <li>Feature importance visualization</li>
+                        <li>Personalized health roadmap and comparison table</li>
+                    </ul>
+                </article>
+                <article class="workflow-detail-card">
+                    <h5><i class="fas fa-shield-heart"></i> Why It Matters</h5>
+                    <ul>
+                        <li>Supports early screening and proactive intervention</li>
+                        <li>Presents complex model output in clinician-friendly format</li>
+                        <li>Improves awareness through interactive simulation and reporting</li>
+                        <li>Built for clear, explainable and actionable risk communication</li>
+                    </ul>
+                </article>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

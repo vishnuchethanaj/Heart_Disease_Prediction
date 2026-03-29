@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart Disease Prediction - ANN Model</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="./css/styles.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="logo" onclick="navigateTo('home')">
+                <i class="fas fa-heartbeat"></i>
+                <span>CardioAI</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HOME PAGE -->
+    <div class="page active" id="home-page">
+        <div class="container">
+            <div class="hero hero-layout">
+                <div class="hero-content">
+                    <div class="ai-badge">
+                        <i class="fas fa-bolt"></i> <span>Powered by Neural Intelligence</span>
+                    </div>
+                    <h1>
+                        Early Cardiac<br>Prediction. Powered by<br>Neural Intelligence.
+                    </h1>
+                    <p class="hero-subtitle">
+                        CardioAI uses advanced Artificial Neural Networks to analyze patient data for proactive heart health assessment. Supporting clinicians, saving lives.
+                    </p>
+                    <div class="hero-buttons">
+                        <button class="btn btn-primary" onclick="navigateTo('input')">
+                            Start Prediction
+                        </button>
+                        <button class="btn btn-secondary" onclick="window.location.href='extra-info.html'">
+                            Learn More
+                        </button>
+                    </div>
+                </div>
+                <div class="hero-visual" aria-label="Clinical insights preview">
+                    <div class="insight-panel">
+                        <div class="insight-panel-head">
+                            <span class="insight-chip"><i class="fas fa-shield-heart"></i> CardioAI Prediction Engine</span>
+                            <h3>Clinical Decision Snapshot</h3>
+                            <p>Structured heart-risk evaluation pipeline with ANN inference, confidence scoring, and explainable output.</p>
+                        </div>
+                        <div class="insight-grid">
+                            <div class="insight-card">
+                                <span class="insight-label">Model Accuracy</span>
+                                <strong>94.5%</strong>
+                            </div>
+                            <div class="insight-card">
+                                <span class="insight-label">Response Time</span>
+                                <strong>&lt; 2 sec</strong>
+                            </div>
+                            <div class="insight-card">
+                                <span class="insight-label">Risk Classification</span>
+                                <strong>Low / Medium / High</strong>
+                            </div>
+                            <div class="insight-card">
+                                <span class="insight-label">Explainability</span>
+                                <strong>Top 6 Feature Factors</strong>
+                            </div>
+                        </div>
+                        <div class="insight-illustration-wrap">
+                            <img class="insight-heart-image" src="./assets/images/heart-prediction-illustration.svg" alt="Heart prediction illustration" loading="lazy">
+                            <div class="prediction-overlay" aria-hidden="true">
+                                <span class="predict-status"><i class="fas fa-heartbeat"></i> Prediction Active</span>
+                                <span class="predict-metric">94.5% Confidence</span>
+                                <span class="ecg-line"></span>
+                            </div>
+                        </div>
+                        <div class="insight-footer">
+                            <div class="status-dot"></div>
+                            <span>System ready for real-time assessment</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- INPUT PAGE -->
+    <div class="page" id="input-page">
+        <div class="container">
+            <div class="form-container">
+                <!-- Multi-Step Form Navigation -->
+                <div class="form-tabs">
+                    <div class="form-tab active" data-step="1" onclick="switchFormStep(1)">
+                        <span class="tab-step-title">Step 1: Patient Details</span>
+                        <div class="tab-icon"><i class="fas fa-user"></i></div>
+                        <span class="tab-label">Personal Info</span>
+                    </div>
+                    <div class="form-tab-connector"></div>
+                    <div class="form-tab" data-step="2" onclick="switchFormStep(2)">
+                        <span class="tab-step-title">Step 2: Medical Data</span>
+                        <div class="tab-icon"><i class="fas fa-heartbeat"></i></div>
+                        <span class="tab-label">Medical Data</span>
+                    </div>
+                    <div class="form-progress-goal" aria-hidden="true">
+                        <div class="goal-icon"><i class="fas fa-heart-pulse"></i></div>
+                        <span>Heart Rate</span>
+                    </div>
+                </div>
+
+                <p class="step-intro">Please provide your basic details.</p>
+
+                <form id="prediction-form">
+                    <!-- STEP 1: Personal Information -->
+                    <div class="form-step active" id="form-step-1">
+                        <div class="demographics-card">
+                            <h3 class="demographics-title">Demographics</h3>
+
+                            <!-- Age Field -->
+                            <div class="form-group">
+                                <h4 class="field-title-simple">Age</h4>
+                                <div class="slider-wrapper age-slider-layout">
+                                    <div class="slider-manual-control age-manual-control">
+                                        <input type="number" id="age-manual" class="slider-manual-input" min="0" max="120" value="45" step="1" aria-label="Age manual value">
+                                    </div>
+                                    <div class="slider-track-wrap">
+                                        <input type="range" id="age" name="age" min="0" max="120" value="45" step="1">
+                                        <div class="slider-endpoints">
+                                            <span>0</span>
+                                            <span>0-120</span>
+                                        </div>
+                                    </div>
+                                    <span class="slider-value" id="age-value">45 years</span>
+                                </div>
+                            </div>
+
+                            <!-- Gender Field -->
+                            <div class="form-group">
+                                <h4 class="field-title-simple">Gender</h4>
+                                <div class="button-group compact-group">
+                                    <button type="button" class="option-btn active" data-value="1" onclick="selectOption(this, 'gender', 1)">
+                                        <i class="fas fa-mars"></i> Male
+                                    </button>
+                                    <button type="button" class="option-btn" data-value="0" onclick="selectOption(this, 'gender', 0)">
+                                        <i class="fas fa-venus"></i> Female
+                                    </button>
+                                </div>
+                                <input type="hidden" id="gender" name="gender" value="1">
+                            </div>
+
+                            <!-- Chest Pain Field -->
+                            <div class="form-group">
+                                <h4 class="field-title-simple">Chest Pain Assessment</h4>
+                                <div class="button-group multi-row pain-options">
+                                    <button type="button" class="option-btn active" data-value="0" onclick="selectOption(this, 'cp', 0)">
+                                        <i class="fas fa-user"></i> <span>Pressing<br><small>(Typical)</small></span>
+                                    </button>
+                                    <button type="button" class="option-btn" data-value="1" onclick="selectOption(this, 'cp', 1)">
+                                        <i class="fas fa-wind"></i> <span>Different<br><small>(Atypical)</small></span>
+                                    </button>
+                                    <button type="button" class="option-btn" data-value="2" onclick="selectOption(this, 'cp', 2)">
+                                        <i class="fas fa-wave-square"></i> <span>Sharp<br><small>(Non-anginal)</small></span>
+                                    </button>
+                                    <button type="button" class="option-btn" data-value="3" onclick="selectOption(this, 'cp', 3)">
+                                        <i class="fas fa-person-walking"></i> <span>No Pain<br><small>(None)</small></span>
+                                    </button>
+                                </div>
+                                <input type="hidden" id="cp" name="cp" value="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 2: Medical Data -->
+                    <div class="form-step" id="form-step-2">
+                        <!-- Blood Pressure Field -->
+                        <div class="form-group">
+                            <h4 class="field-title-simple">Blood Pressure</h4>
+                            <div class="slider-wrapper">
+                                <input type="range" id="trestbps" name="trestbps" min="0" max="400" value="120" step="1">
+                                <div class="slider-manual-control">
+                                    <input type="number" id="trestbps-manual" class="slider-manual-input" min="0" max="400" value="120" step="1" aria-label="Blood Pressure manual value">
+                                    <span class="slider-manual-unit">mmHg</span>
+                                </div>
+                            </div>
+                            <div class="health-indicator">
+                                <span class="indicator-good">Normal: 120</span>
+                                <span class="indicator-warning">High: 140+</span>
+                                <span class="indicator-danger">Very High: 180+</span>
+                            </div>
+                        </div>
+
+                        <!-- Cholesterol Field -->
+                        <div class="form-group">
+                            <h4 class="field-title-simple">Cholesterol</h4>
+                            <div class="slider-wrapper">
+                                <input type="range" id="chol" name="chol" min="0" max="1000" value="200" step="1">
+                                <div class="slider-manual-control">
+                                    <input type="number" id="chol-manual" class="slider-manual-input" min="0" max="1000" value="200" step="1" aria-label="Cholesterol manual value">
+                                    <span class="slider-manual-unit">mg/dl</span>
+                                </div>
+                            </div>
+                            <div class="health-indicator">
+                                <span class="indicator-good">Good: 200</span>
+                                <span class="indicator-warning">High: 240</span>
+                                <span class="indicator-danger">Very High: 280+</span>
+                            </div>
+                        </div>
+
+                        <!-- Heart Rate Field -->
+                        <div class="form-group">
+                            <h4 class="field-title-simple">Maximum Heart Rate</h4>
+                            <div class="slider-wrapper">
+                                <input type="range" id="thalach" name="thalach" min="0" max="300" value="120" step="1">
+                                <div class="slider-manual-control">
+                                    <input type="number" id="thalach-manual" class="slider-manual-input" min="0" max="300" value="120" step="1" aria-label="Maximum Heart Rate manual value">
+                                    <span class="slider-manual-unit">bpm</span>
+                                </div>
+                            </div>
+                            <div class="health-indicator">
+                                <span class="indicator-info">60-100: Rested</span>
+                                <span class="indicator-info">100-150: Exercise</span>
+                                <span class="indicator-info">150+: High Activity</span>
+                            </div>
+                        </div>
+
+                        <!-- Fasting Blood Sugar Field -->
+                        <div class="form-group">
+                            <h4 class="field-title-simple">Fasting Blood Sugar</h4>
+                            <div class="button-group">
+                                <button type="button" class="option-btn active" data-value="0" onclick="selectOption(this, 'fbs', 0)">
+                                    <i class="fas fa-check"></i> No (Normal)
+                                </button>
+                                <button type="button" class="option-btn" data-value="1" onclick="selectOption(this, 'fbs', 1)">
+                                    <i class="fas fa-exclamation"></i> Yes (High)
+                                </button>
+                            </div>
+                            <input type="hidden" id="fbs" name="fbs" value="0">
+                        </div>
+
+                        <!-- Heart Wave Test Field -->
+
+                        <!-- ST Slope Field -->
+                    </div>
+
+                    <!-- Form Navigation & Actions -->
+                    <div class="form-actions-multi">
+                        <button type="button" class="btn btn-secondary" id="prev-btn" onclick="switchFormStep(currentStep - 1)" style="display: none;">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="next-btn" onclick="switchFormStep(currentStep + 1)">
+                            Next <i class="fas fa-arrow-right"></i>
+                        </button>
+                        <button type="submit" class="btn btn-primary-gradient" id="submit-btn" style="display: none;">
+                            <i class="fas fa-bolt"></i> Run Prediction
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROCESSING PAGE -->
+    <div class="page" id="processing-page">
+        <div class="container processing-container">
+            <div class="processing-card">
+                <h2 class="processing-title">
+                    <i class="fas fa-cog"></i> Processing Your Data
+                </h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">Please wait while we analyze your health information...</p>
+
+                <div class="loader"></div>
+
+                <ul class="processing-steps-list">
+                    <li class="processing-step">
+                        <span class="step-number">1</span>
+                        <span class="step-text">Collecting patient data…</span>
+                    </li>
+                    <li class="processing-step">
+                        <span class="step-number">2</span>
+                        <span class="step-text">Preprocessing and normalizing…</span>
+                    </li>
+                    <li class="processing-step">
+                        <span class="step-number">3</span>
+                        <span class="step-text">Running ANN model…</span>
+                    </li>
+                    <li class="processing-step">
+                        <span class="step-number">4</span>
+                        <span class="step-text">Analyzing patterns and generating insights…</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- RESULTS PAGE -->
+    <div class="page" id="results-page">
+        <div class="container results-container">
+            <div class="results-header">
+                <h2><i class="fas fa-chart-line"></i> Prediction Results</h2>
+                <p style="color: var(--text-secondary); margin-top: 0.5rem;">Comprehensive health analysis based on your data</p>
+            </div>
+
+            <!-- Main Results Grid -->
+            <div class="results-grid">
+                <!-- Risk Gauge -->
+                <div class="result-card">
+                    <h3><i class="fas fa-bullseye"></i> Risk Assessment</h3>
+                    <div class="gauge-container">
+                        <div class="risk-meter" aria-label="Risk meter">
+                            <div class="risk-arc"></div>
+                            <span class="meter-zone zone-safe">SAFE</span>
+                            <span class="meter-zone zone-caution">CAUTION</span>
+                            <span class="meter-zone zone-danger">DANGER</span>
+                            <div class="risk-needle" id="risk-needle"></div>
+                            <div class="risk-pivot"></div>
+                        </div>
+                    </div>
+                    <div class="gauge-value">
+                        <div class="gauge-percentage" id="risk-percentage">72</div>
+                        <div class="gauge-label">Risk %</div>
+                    </div>
+                    <div class="risk-label risk-high" id="risk-badge">High Risk</div>
+                </div>
+
+                <!-- Probability Distribution -->
+                <div class="result-card">
+                    <h3><i class="fas fa-chart-pie"></i> Probability Distribution</h3>
+                    <div class="chart-container small-chart">
+                        <canvas id="probabilityChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Confidence Score -->
+                <div class="result-card">
+                    <h3><i class="fas fa-shield-alt"></i> Model Confidence</h3>
+                    <div class="info-cards" style="margin-top: 1.5rem;">
+                        <div class="info-card">
+                            <div class="info-card-value" id="confidence-score">94</div>
+                            <div class="info-card-label">Confidence Score %</div>
+                        </div>
+                    </div>
+                    <p style="margin-top: 1rem; color: var(--text-secondary); text-align: center; font-size: 0.9rem;">
+                        <i class="fas fa-check-circle"></i> High confidence in prediction accuracy
+                    </p>
+                </div>
+            </div>
+
+            <!-- Feature Importance -->
+            <div class="result-card" style="margin-bottom: 2rem;">
+                <h3><i class="fas fa-chart-bar"></i> Feature Importance (Explainable AI)</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.95rem;">
+                    These factors had the greatest impact on your prediction:
+                </p>
+                <div class="feature-chart-wrap">
+                    <div class="feature-axis">
+                        <span>30%</span>
+                        <span>25%</span>
+                        <span>20%</span>
+                        <span>15%</span>
+                        <span>10%</span>
+                        <span>5%</span>
+                        <span>0%</span>
+                    </div>
+                    <ul class="feature-bars">
+                        <li class="feature-bar">
+                            <div class="feature-value" id="feature-chol">28%</div>
+                            <div class="bar-bg">
+                                <div class="bar-fill" style="height: 28%;"></div>
+                            </div>
+                            <div class="feature-name"><i class="fas fa-heart"></i> Cholesterol</div>
+                        </li>
+                        <li class="feature-bar">
+                            <div class="feature-value" id="feature-age">22%</div>
+                            <div class="bar-bg">
+                                <div class="bar-fill" style="height: 22%;"></div>
+                            </div>
+                            <div class="feature-name"><i class="fas fa-birthday-cake"></i> Age</div>
+                        </li>
+                        <li class="feature-bar">
+                            <div class="feature-value" id="feature-bp">18%</div>
+                            <div class="bar-bg">
+                                <div class="bar-fill" style="height: 18%;"></div>
+                            </div>
+                            <div class="feature-name"><i class="fas fa-tachometer-alt"></i> Blood Pressure</div>
+                        </li>
+                        <li class="feature-bar">
+                            <div class="feature-value" id="feature-hr">15%</div>
+                            <div class="bar-bg">
+                                <div class="bar-fill" style="height: 15%;"></div>
+                            </div>
+                            <div class="feature-name"><i class="fas fa-heart-pulse"></i> Heart Rate</div>
+                        </li>
+                        <li class="feature-bar">
+                            <div class="feature-value" id="feature-st">12%</div>
+                            <div class="bar-bg">
+                                <div class="bar-fill" style="height: 12%;"></div>
+                            </div>
+                            <div class="feature-name"><i class="fas fa-heartbeat"></i> ST Depression</div>
+                        </li>
+                        <li class="feature-bar">
+                            <div class="feature-value" id="feature-other">5%</div>
+                            <div class="bar-bg">
+                                <div class="bar-fill" style="height: 5%;"></div>
+                            </div>
+                            <div class="feature-name"><i class="fas fa-dna"></i> Others</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Comparison Chart -->
+            <div class="result-card" style="margin-bottom: 2rem;">
+                <h3><i class="fas fa-exchange-alt"></i> Your Values vs Normal Ranges</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Metric</th>
+                            <th>Your Value</th>
+                            <th>Normal Range</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Blood Pressure (Systolic)</td>
+                            <td id="comp-bp">120</td>
+                            <td>90-120 mmHg</td>
+                            <td><span class="badge badge-success" data-field="bp">Normal</span></td>
+                        </tr>
+                        <tr>
+                            <td>Cholesterol</td>
+                            <td id="comp-chol">200</td>
+                            <td>< 200 mg/dl</td>
+                            <td><span class="badge badge-warning" data-field="chol">Borderline</span></td>
+                        </tr>
+                        <tr>
+                            <td>Heart Rate</td>
+                            <td id="comp-hr">150</td>
+                            <td>60-100 bpm</td>
+                            <td><span class="badge badge-warning" data-field="hr">Elevated</span></td>
+                        </tr>
+                        <tr>
+                            <td>Age</td>
+                            <td id="comp-age">40</td>
+                            <td>Any</td>
+                            <td><span class="badge badge-success">Recorded</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+
+            <!-- Health Roadmap -->
+            <div class="result-card roadmap-section">
+                <h3><i class="fas fa-map-marked-alt"></i> Personalized Health Roadmap</h3>
+                <p id="roadmap-description" style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.95rem;">
+                    Customized recommendations based on your prediction:
+                </p>
+                <ul class="roadmap-timeline" id="roadmap-timeline">
+                    <li class="roadmap-item">
+                        <div class="roadmap-item-content">
+                            <div class="roadmap-item-title">🏥 Immediate Actions (This Week)</div>
+                            <div class="roadmap-item-desc">
+                                • Schedule a consultation with a cardiologist<br>
+                                • Start monitoring blood pressure daily<br>
+                                • Review current medications with doctor
+                            </div>
+                        </div>
+                    </li>
+                    <li class="roadmap-item">
+                        <div class="roadmap-item-content">
+                            <div class="roadmap-item-title">💊 Medical Management (2-4 Weeks)</div>
+                            <div class="roadmap-item-desc">
+                                • Consider cholesterol-lowering medications<br>
+                                • Take prescribed medications consistently<br>
+                                • Get baseline ECG and stress test if recommended
+                            </div>
+                        </div>
+                    </li>
+                    <li class="roadmap-item">
+                        <div class="roadmap-item-content">
+                            <div class="roadmap-item-title">🏃 Lifestyle Modifications (Ongoing)</div>
+                            <div class="roadmap-item-desc">
+                                • Exercise 150 minutes per week (moderate intensity)<br>
+                                • Follow heart-healthy diet (low sodium, low saturated fat)<br>
+                                • Reduce stress through meditation or yoga
+                            </div>
+                        </div>
+                    </li>
+                    <li class="roadmap-item">
+                        <div class="roadmap-item-content">
+                            <div class="roadmap-item-title">📊 Regular Monitoring (Monthly)</div>
+                            <div class="roadmap-item-desc">
+                                • Check-ups every 3 months<br>
+                                • Monitor and log vital signs<br>
+                                • Track lifestyle changes and health progress
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="form-actions" style="margin-top: 3rem;">
+                <button class="btn btn-danger-light btn-large" onclick="navigateTo('input')">
+                    <i class="fas fa-redo"></i> New Prediction
+                </button>
+                <button class="btn btn-primary btn-large" onclick="downloadReport()">
+                    <i class="fas fa-download"></i> Download Report
+                </button>
+                <button class="btn btn-secondary btn-large" onclick="navigateTo('home')">
+                    <i class="fas fa-home"></i> Home
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="./js/app.js"></script>
+</body>
+</html>
