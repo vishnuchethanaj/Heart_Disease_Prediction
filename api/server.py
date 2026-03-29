@@ -1,9 +1,9 @@
 from flask import Flask, request, jsonify, send_from_directory, abort
 from flask_cors import CORS
-import pandas as pd
-import numpy as np
-import json
+import csv
 import os
+from collections import Counter
+from math import sqrt
 
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 app = Flask(__name__, static_folder=project_root)
@@ -11,17 +11,83 @@ CORS(app)
 
 # Load CSV data
 data_path = os.path.join(project_root, 'heart_disease_selected_features.csv')
-df = pd.read_csv(data_path)
+
+
+def _to_number(value):
+    try:
+        num = float(value)
+        if num.is_integer():
+            return int(num)
+        return num
+    except (TypeError, ValueError):
+        return value
+
+
+def _load_dataset(csv_path):
+    with open(csv_path, 'r', encoding='utf-8-sig', newline='') as file_obj:
+        reader = csv.DictReader(file_obj)
+        columns = reader.fieldnames or []
+        rows = []
+
+        for raw_row in reader:
+            parsed = {}
+            for key, value in raw_row.items():
+                if value is None:
+                    parsed[key] = None
+                    continue
+
+                cleaned = value.strip()
+                parsed[key] = None if cleaned == '' else _to_number(cleaned)
+
+            rows.append(parsed)
+
+    return rows, columns
+
+
+def _numeric_values(rows, column):
+    values = []
+    for row in rows:
+        value = row.get(column)
+        if isinstance(value, (int, float)):
+            values.append(float(value))
+    return values
+
+
+def _column_mean(values):
+    if not values:
+        return 0.0
+    return sum(values) / len(values)
+
+
+def _column_std(values):
+    if len(values) < 2:
+        return 0.0
+    mean_val = _column_mean(values)
+    variance = sum((value - mean_val) ** 2 for value in values) / len(values)
+    return sqrt(variance)
+
+
+rows, columns = _load_dataset(data_path)
+
+cp_counts = Counter(int(row['cp']) for row in rows if isinstance(row.get('cp'), (int, float)))
+slope_counts = Counter(int(row['slope']) for row in rows if isinstance(row.get('slope'), (int, float)))
+restecg_counts = Counter(int(row['restecg']) for row in rows if isinstance(row.get('restecg'), (int, float)))
+fbs_counts = Counter(int(row['fbs']) for row in rows if isinstance(row.get('fbs'), (int, float)))
+
+thalach_values = _numeric_values(rows, 'thalach')
+chol_values = _numeric_values(rows, 'chol')
+trestbps_values = _numeric_values(rows, 'trestbps')
+target_values = [int(row['target']) for row in rows if isinstance(row.get('target'), (int, float))]
 
 # Calculate statistics from CSV data
 csv_stats = {
-    'cp': list(df['cp'].value_counts().to_dict().items()),
-    'thalach': {'min': float(df['thalach'].min()), 'max': float(df['thalach'].max()), 'mean': float(df['thalach'].mean())},
-    'slope': list(df['slope'].value_counts().to_dict().items()),
-    'restecg': list(df['restecg'].value_counts().to_dict().items()),
-    'fbs': list(df['fbs'].value_counts().to_dict().items()),
-    'chol': {'min': float(df['chol'].min()), 'max': float(df['chol'].max()), 'mean': float(df['chol'].mean())},
-    'trestbps': {'min': float(df['trestbps'].min()), 'max': float(df['trestbps'].max()), 'mean': float(df['trestbps'].mean())},
+    'cp': list(cp_counts.items()),
+    'thalach': {'min': float(min(thalach_values)), 'max': float(max(thalach_values)), 'mean': float(_column_mean(thalach_values))},
+    'slope': list(slope_counts.items()),
+    'restecg': list(restecg_counts.items()),
+    'fbs': list(fbs_counts.items()),
+    'chol': {'min': float(min(chol_values)), 'max': float(max(chol_values)), 'mean': float(_column_mean(chol_values))},
+    'trestbps': {'min': float(min(trestbps_values)), 'max': float(max(trestbps_values)), 'mean': float(_column_mean(trestbps_values))},
 }
 
 @app.route('/api/health', methods=['GET'])
@@ -42,13 +108,16 @@ def serve_home():
 @app.route('/api/data-info', methods=['GET'])
 def data_info():
     """Get CSV data information"""
+    no_disease = sum(1 for value in target_values if value == 0)
+    disease = sum(1 for value in target_values if value == 1)
+
     return jsonify({
-        'total_records': len(df),
-        'features': list(df.columns),
+        'total_records': len(rows),
+        'features': columns,
         'statistics': csv_stats,
         'disease_distribution': {
-            'no_disease': int(df[df['target'] == 0].shape[0]),
-            'disease': int(df[df['target'] == 1].shape[0])
+            'no_disease': no_disease,
+            'disease': disease
         }
     })
 
@@ -219,12 +288,12 @@ def get_csv_data():
     try:
         # Return sample of data
         sample_size = int(request.args.get('sample_size', 100))
-        sample_df = df.head(sample_size)
+        sample_rows = rows[:max(0, sample_size)]
         
         return jsonify({
-            'columns': list(df.columns),
-            'total_rows': len(df),
-            'data': sample_df.to_dict('records')
+            'columns': columns,
+            'total_rows': len(rows),
+            'data': sample_rows
         }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -233,23 +302,24 @@ def get_csv_data():
 def get_feature_ranges():
     """Get min/max ranges for each feature"""
     ranges = {}
-    
-    numeric_cols = df.select_dtypes(include=[np.number]).columns
-    categorical_cols = df.select_dtypes(exclude=[np.number]).columns
-    
-    for col in numeric_cols:
-        ranges[col] = {
-            'min': float(df[col].min()),
-            'max': float(df[col].max()),
-            'mean': float(df[col].mean()),
-            'std': float(df[col].std())
-        }
-    
-    for col in categorical_cols:
-        ranges[col] = {
-            'unique_values': list(df[col].unique()),
-            'value_counts': df[col].value_counts().to_dict()
-        }
+
+    for col in columns:
+        values = [row.get(col) for row in rows if row.get(col) is not None]
+        numeric_values = [float(value) for value in values if isinstance(value, (int, float))]
+
+        if values and len(numeric_values) == len(values):
+            ranges[col] = {
+                'min': float(min(numeric_values)),
+                'max': float(max(numeric_values)),
+                'mean': float(_column_mean(numeric_values)),
+                'std': float(_column_std(numeric_values))
+            }
+        else:
+            counts = Counter(str(value) for value in values)
+            ranges[col] = {
+                'unique_values': list(counts.keys()),
+                'value_counts': dict(counts)
+            }
     
     return jsonify(ranges), 200
 
@@ -268,7 +338,7 @@ def serve_static(path):
 if __name__ == '__main__':
     print("Starting Flask API Server...")
     print("CSV Data Loaded:")
-    print(f"  - Total Records: {len(df)}")
-    print(f"  - Features: {list(df.columns)}")
-    print(f"  - Disease Distribution: {df['target'].value_counts().to_dict()}")
+    print(f"  - Total Records: {len(rows)}")
+    print(f"  - Features: {columns}")
+    print(f"  - Disease Distribution: {dict(Counter(target_values))}")
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=False)
