@@ -91,55 +91,51 @@
     <div class="page" id="input-page">
         <div class="container">
             <div class="form-container">
-                <!-- Multi-Step Form Navigation -->
-                <div class="form-tabs">
-                    <div class="form-tab active" data-step="1" onclick="switchFormStep(1)">
-                        <span class="tab-step-title">Step 1: Patient Details</span>
-                        <div class="tab-icon"><i class="fas fa-user"></i></div>
-                        <span class="tab-label">Personal Info</span>
+                <div class="form-stepper">
+                    <div class="step active" data-step="1">
+                        <div class="step-icon"><i class="fas fa-user"></i></div>
+                        <div class="step-label">
+                            <span class="step-title">Step 1: Patient Details</span>
+                            <span class="step-subtitle">Personal Info</span>
+                        </div>
                     </div>
-                    <div class="form-tab-connector"></div>
-                    <div class="form-tab" data-step="2" onclick="switchFormStep(2)">
-                        <span class="tab-step-title">Step 2: Medical Data</span>
-                        <div class="tab-icon"><i class="fas fa-heartbeat"></i></div>
-                        <span class="tab-label">Medical Data</span>
-                    </div>
-                    <div class="form-progress-goal" aria-hidden="true">
-                        <div class="goal-icon"><i class="fas fa-heart-pulse"></i></div>
-                        <span>Heart Rate</span>
+                    <div class="step-connector"></div>
+                    <div class="step" data-step="2">
+                        <div class="step-icon"><i class="fas fa-heartbeat"></i></div>
+                        <div class="step-label">
+                            <span class="step-title">Step 2: Medical Data</span>
+                            <span class="step-subtitle">Heart-rate</span>
+                        </div>
                     </div>
                 </div>
-
-                <p class="step-intro">Please provide your basic details.</p>
 
                 <form id="prediction-form">
                     <!-- STEP 1: Personal Information -->
                     <div class="form-step active" id="form-step-1">
-                        <div class="demographics-card">
-                            <h3 class="demographics-title">Demographics</h3>
-
+                        <div class="form-section">
                             <!-- Age Field -->
                             <div class="form-group">
-                                <h4 class="field-title-simple">Age</h4>
+                                <label for="age" class="form-label">Age</label>
                                 <div class="slider-wrapper age-slider-layout">
-                                    <div class="slider-manual-control age-manual-control">
-                                        <input type="number" id="age-manual" class="slider-manual-input" min="0" max="120" value="45" step="1" aria-label="Age manual value">
-                                    </div>
                                     <div class="slider-track-wrap">
-                                        <input type="range" id="age" name="age" min="0" max="120" value="45" step="1">
+                                        <input type="range" id="age" name="age" min="0" max="120" value="45" step="1" class="slider" aria-label="Age slider">
                                         <div class="slider-endpoints">
                                             <span>0</span>
-                                            <span>0-120</span>
+                                            <span>120</span>
                                         </div>
                                     </div>
-                                    <span class="slider-value" id="age-value">45 years</span>
+                                    <div class="slider-manual-control age-manual-control">
+                                        <input type="number" id="age-manual" class="slider-manual-input" min="0" max="120" value="45" step="1" aria-label="Age manual value">
+                                        <span class="slider-manual-unit">years</span>
+                                    </div>
+                                    <div class="slider-value" id="age-value">45 years</div>
                                 </div>
                             </div>
 
                             <!-- Gender Field -->
                             <div class="form-group">
-                                <h4 class="field-title-simple">Gender</h4>
-                                <div class="button-group compact-group">
+                                <label class="form-label">Gender</label>
+                                <div class="button-group">
                                     <button type="button" class="option-btn active" data-value="1" onclick="selectOption(this, 'gender', 1)">
                                         <i class="fas fa-mars"></i> Male
                                     </button>
@@ -149,22 +145,24 @@
                                 </div>
                                 <input type="hidden" id="gender" name="gender" value="1">
                             </div>
+                        </div>
 
+                        <div class="form-section">
+                            <h3 class="form-section-title">Chest Pain Assessment</h3>
                             <!-- Chest Pain Field -->
                             <div class="form-group">
-                                <h4 class="field-title-simple">Chest Pain Assessment</h4>
-                                <div class="button-group multi-row pain-options">
+                                <div class="button-group multi-row">
                                     <button type="button" class="option-btn active" data-value="0" onclick="selectOption(this, 'cp', 0)">
-                                        <i class="fas fa-user"></i> <span>Pressing<br><small>(Typical)</small></span>
+                                        <i class="fas fa-grip-lines"></i> <span>Pressing<br><small>(Typical)</small></span>
                                     </button>
                                     <button type="button" class="option-btn" data-value="1" onclick="selectOption(this, 'cp', 1)">
                                         <i class="fas fa-wind"></i> <span>Different<br><small>(Atypical)</small></span>
                                     </button>
                                     <button type="button" class="option-btn" data-value="2" onclick="selectOption(this, 'cp', 2)">
-                                        <i class="fas fa-wave-square"></i> <span>Sharp<br><small>(Non-anginal)</small></span>
+                                        <i class="fas fa-dot-circle"></i> <span>Sharp<br><small>(Non-anginal)</small></span>
                                     </button>
                                     <button type="button" class="option-btn" data-value="3" onclick="selectOption(this, 'cp', 3)">
-                                        <i class="fas fa-person-walking"></i> <span>No Pain<br><small>(None)</small></span>
+                                        <i class="fas fa-check-circle"></i> <span>No Pain<br><small>(None)</small></span>
                                     </button>
                                 </div>
                                 <input type="hidden" id="cp" name="cp" value="0">
@@ -517,6 +515,7 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="./js/app.js"></script>
 </body>
 </html>

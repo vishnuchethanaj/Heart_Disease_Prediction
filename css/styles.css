@@ -522,7 +522,7 @@ body {
     min-width: 120px;
 }
 
-.step-icon {
+.workflow-step .step-icon {
     width: 80px;
     height: 80px;
     background: linear-gradient(135deg, var(--primary), #60A5FA);
@@ -536,7 +536,7 @@ body {
     box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
 }
 
-.step-icon:nth-child(1) {
+.workflow-step .step-icon:nth-child(1) {
     animation-delay: 0s;
 }
 
@@ -549,7 +549,7 @@ body {
     }
 }
 
-.step-label {
+.workflow-step .step-label {
     font-size: 0.9rem;
     text-align: center;
     max-width: 100px;
@@ -620,6 +620,86 @@ body {
 
 .form-header p {
     color: var(--text-secondary);
+}
+
+/* Input page stepper */
+.form-stepper {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 54px minmax(0, 1fr);
+    align-items: center;
+    gap: 0.9rem;
+    margin-bottom: 1.45rem;
+    padding: 1rem;
+    border-radius: 14px;
+    border: 1px solid #d8e4f3;
+    background: linear-gradient(160deg, #f9fcff 0%, #f3f8ff 100%);
+}
+
+.form-stepper .step {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.7rem 0.8rem;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    background: rgba(255, 255, 255, 0.58);
+    transition: all 0.25s ease;
+}
+
+.form-stepper .step.active {
+    border-color: #9ec2ed;
+    background: linear-gradient(180deg, #ffffff 0%, #f4f9ff 100%);
+    box-shadow: 0 8px 20px rgba(31, 95, 207, 0.12);
+}
+
+.form-stepper .step-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    background: #eef4ff;
+    border: 2px solid #3f7fd7;
+    color: #2b67bf;
+    box-shadow: 0 6px 16px rgba(31, 95, 207, 0.16);
+    animation: none;
+}
+
+.form-stepper .step.active .step-icon {
+    background: linear-gradient(135deg, #2a67c7, #184ca8);
+    border-color: #1a4f99;
+    color: #fff;
+}
+
+.form-stepper .step-label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+    max-width: none;
+    text-align: left;
+}
+
+.form-stepper .step-title {
+    font-size: 0.95rem;
+    line-height: 1.25;
+    font-weight: 600;
+    color: #1a3d77;
+}
+
+.form-stepper .step-subtitle {
+    font-size: 0.8rem;
+    color: #4a658d;
+    line-height: 1.2;
+}
+
+.step-connector {
+    height: 2px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #acc8ed 0%, #7aa3df 100%);
+    opacity: 0.9;
 }
 
 /* Multi-Step Form Tabs */
@@ -1074,6 +1154,13 @@ input[type="range"] {
 
 .slider-track-wrap {
     flex: 1;
+    min-width: 0;
+}
+
+.slider-track-wrap input[type="range"] {
+    width: 100%;
+    min-width: 0;
+    display: block;
 }
 
 .slider-endpoints {
@@ -1143,6 +1230,9 @@ input[type="range"] {
 }
 
 .slider-value {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     background: #ffffff;
     color: #2f3f5f;
     padding: 0.42rem 0.86rem;
@@ -1204,6 +1294,19 @@ input[type="range"] {
 @media (max-width: 768px) {
     .form-container {
         padding: 1.3rem 1rem;
+    }
+
+    .form-stepper {
+        grid-template-columns: 1fr;
+        gap: 0.7rem;
+        padding: 0.85rem;
+    }
+
+    .step-connector {
+        width: 2px;
+        height: 26px;
+        margin: 0 auto;
+        background: linear-gradient(180deg, #acc8ed 0%, #7aa3df 100%);
     }
 
     .form-tabs {

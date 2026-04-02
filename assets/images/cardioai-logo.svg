@@ -1,0 +1,6 @@
+<svg width="280" height="64" viewBox="0 0 280 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="280" height="64" fill="white"/>
+  <path d="M29.4 18C24.2 18 20 22.2 20 27.4C20 37.3 33.6 45.5 40 50C46.4 45.5 60 37.3 60 27.4C60 22.2 55.8 18 50.6 18C46.8 18 43.5 20.2 42 23.4C40.5 20.2 37.2 18 33.4 18H29.4Z" fill="#2A67CC"/>
+  <path d="M26 33H33.5L36.5 27L40.5 37L44 30H54" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="72" y="43" fill="#2A67CC" font-family="Poppins, Arial, sans-serif" font-size="40" font-weight="700">CardioAI</text>
+</svg>

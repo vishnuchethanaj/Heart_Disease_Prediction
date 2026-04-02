@@ -352,8 +352,8 @@ class PredictionHandler {
             return;
         }
 
-        const riskPercentage = this.predictionResult.riskPercentage;
-        const confidence = this.predictionResult.confidence;
+        const riskPercentage = parseFloat(this.predictionResult.riskPercentage) || 0;
+        const confidence = parseFloat(this.predictionResult.confidence) || 0;
 
         const reportText = `
 HEART DISEASE PREDICTION REPORT
@@ -395,6 +395,39 @@ NEXT STEPS
 For more information, visit your healthcare provider.
         `;
 
+        if (window.jspdf && window.jspdf.jsPDF) {
+            const pdf = new window.jspdf.jsPDF({
+                orientation: 'portrait',
+                unit: 'pt',
+                format: 'a4'
+            });
+
+            const margin = 40;
+            const maxWidth = 515;
+            const lineHeight = 16;
+            const lines = pdf.splitTextToSize(reportText.trim(), maxWidth);
+
+            let y = margin;
+            const pageHeight = pdf.internal.pageSize.getHeight();
+
+            pdf.setFont('courier', 'normal');
+            pdf.setFontSize(11);
+
+            lines.forEach((line) => {
+                if (y > pageHeight - margin) {
+                    pdf.addPage();
+                    y = margin;
+                }
+                pdf.text(line, margin, y);
+                y += lineHeight;
+            });
+
+            pdf.save('heart_disease_report_' + new Date().getTime() + '.pdf');
+            Alert.success('PDF report downloaded successfully');
+            return;
+        }
+
+        // Fallback to text download when PDF library is unavailable.
         const blob = new Blob([reportText], { type: 'text/plain' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');

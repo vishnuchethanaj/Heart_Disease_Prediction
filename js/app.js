@@ -113,11 +113,7 @@ function setupEventListeners() {
         const renderValue = (rawValue) => {
             const numericValue = Number(rawValue);
             if (display) {
-                if (fieldId === 'age') {
-                    display.textContent = `${numericValue || 1} ${config.unit}`;
-                } else {
-                    display.textContent = `${numericValue} ${config.unit}`;
-                }
+                display.textContent = `${numericValue} ${config.unit}`;
             }
             if (manualInput && manualInput.value !== String(numericValue)) {
                 manualInput.value = numericValue;
@@ -128,12 +124,17 @@ function setupEventListeners() {
             input.addEventListener('input', function() {
                 renderValue(this.value);
             });
-            renderValue(input.value);
+            renderValue(input.value); // Initial render
         }
 
         if (manualInput && input) {
             const syncManualToSlider = () => {
-                let value = parseInt(manualInput.value, 10);
+                const raw = manualInput.value.trim();
+                if (raw === '') {
+                    return;
+                }
+
+                let value = parseInt(raw, 10);
                 if (Number.isNaN(value)) {
                     return;
                 }
@@ -147,8 +148,17 @@ function setupEventListeners() {
                 renderValue(value);
             };
 
+            const restoreIfEmptyOrInvalid = () => {
+                const raw = manualInput.value.trim();
+                if (raw === '' || Number.isNaN(Number(raw))) {
+                    manualInput.value = input.value;
+                }
+                syncManualToSlider();
+            };
+
             manualInput.addEventListener('input', syncManualToSlider);
             manualInput.addEventListener('change', syncManualToSlider);
+            manualInput.addEventListener('blur', restoreIfEmptyOrInvalid);
         }
     });
 
@@ -196,26 +206,28 @@ function initializeMultiStepForm() {
 
 // Update form step display
 function updateFormStep() {
-    // Hide all steps
     document.querySelectorAll('.form-step').forEach(step => {
         step.classList.remove('active');
     });
+    const activeStepElement = document.querySelector(`#form-step-${currentStep}`);
+    if (activeStepElement) {
+        activeStepElement.classList.add('active');
+    }
 
-    // Show current step
-    const currentStepElement = document.getElementById(`form-step-${currentStep}`);
-    if (currentStepElement) {
-        currentStepElement.classList.add('active');
+    document.querySelectorAll('.step').forEach(step => {
+        step.classList.remove('active');
+    });
+    const activeIndicator = document.querySelector(`.step[data-step="${currentStep}"]`);
+    if (activeIndicator) {
+        activeIndicator.classList.add('active');
     }
 
     // Update tabs
     document.querySelectorAll('.form-tab').forEach((tab, index) => {
         const stepNum = index + 1;
-        tab.classList.remove('active', 'completed');
-
+        tab.classList.remove('active');
         if (stepNum === currentStep) {
             tab.classList.add('active');
-        } else if (stepNum < currentStep) {
-            tab.classList.add('completed');
         }
     });
 
@@ -235,7 +247,7 @@ function updateFormStep() {
     }
 
     // Scroll to top
-    const inputPage = document.getElementById('input-page');
+    const inputPage = document.querySelector('.input-page');
     if (inputPage) {
         inputPage.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -298,33 +310,11 @@ function selectOption(button, fieldName, value) {
 
 // Navigate between pages
 function navigateTo(page) {
-    // Hide all pages
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-
-    // Show selected page
-    const pageElement = document.getElementById(page + '-page');
+    const pageElement = document.getElementById(`${page}-page`);
     if (pageElement) {
         pageElement.classList.add('active');
         window.scrollTo(0, 0);
-    }
-
-    // Initialize/resize charts only when results page is visible
-    if (page === 'results') {
-        if (!probabilityChart) {
-            initializeCharts();
-        }
-        setTimeout(() => {
-            if (probabilityChart) {
-                if (currentPrediction) {
-                    probabilityChart.data.datasets[0].data = [
-                        currentPrediction.probDisease,
-                        currentPrediction.probNoDisease
-                    ];
-                }
-                probabilityChart.resize();
-                probabilityChart.update();
-            }
-        }, 500);
     }
 }
 
@@ -804,48 +794,211 @@ function updateSimulator() {
     simRiskEl.textContent = Math.round(adjustedRisk) + '%';
 }
 
+function loadImageAsDataUrl(srcPath) {
+    return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.crossOrigin = 'anonymous';
+
+        image.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = image.naturalWidth;
+            canvas.height = image.naturalHeight;
+
+            const context = canvas.getContext('2d');
+            if (!context) {
+                reject(new Error('Canvas context unavailable'));
+                return;
+            }
+
+            context.drawImage(image, 0, 0);
+            resolve(canvas.toDataURL('image/png'));
+        };
+
+        image.onerror = () => reject(new Error('Failed to load image'));
+        image.src = srcPath;
+    });
+}
+
 // Download report
-function downloadReport() {
-    const riskPercentage = document.getElementById('risk-percentage').textContent;
-    const confidence = document.getElementById('confidence-score').textContent;
+async function downloadReport() {
+    const riskText = document.getElementById('risk-percentage').textContent;
+    const confidenceText = document.getElementById('confidence-score').textContent;
+    const riskPercentage = parseFloat(riskText) || 0;
+    const confidence = parseFloat(confidenceText) || 0;
 
-    const reportText = `
-HEART DISEASE PREDICTION REPORT
-Generated: ${new Date().toLocaleString()}
+    const statusLabel = riskPercentage > 60 ? 'HIGH RISK' : riskPercentage > 40 ? 'MODERATE RISK' : 'LOW RISK';
+    const reportDate = new Date().toLocaleString();
+    const patientData = [
+        ['Age', `${currentFormData.age || 'N/A'} years`],
+        ['Gender', `${currentFormData.gender === '1' ? 'Male' : 'Female'}`],
+        ['Cholesterol', `${currentFormData.chol || 'N/A'} mg/dL`],
+        ['Blood Pressure', `${currentFormData.trestbps || 'N/A'} mmHg`],
+        ['Heart Rate', `${currentFormData.thalach || 'N/A'} bpm`]
+    ];
 
-═══════════════════════════════════════
-PREDICTION SUMMARY
-═══════════════════════════════════════
-Risk Level: ${riskPercentage}%
-Model Confidence: ${confidence}%
-Status: ${riskPercentage > 60 ? 'HIGH RISK' : riskPercentage > 40 ? 'MODERATE RISK' : 'LOW RISK'}
+    if (window.jspdf && window.jspdf.jsPDF) {
+        const pdf = new window.jspdf.jsPDF({
+            orientation: 'portrait',
+            unit: 'pt',
+            format: 'a4'
+        });
 
-User Input Data:
-- Age: ${currentFormData.age}
-- Gender: ${currentFormData.gender === '1' ? 'Male' : 'Female'}
-- Cholesterol: ${currentFormData.chol} mg/dl
-- Blood Pressure: ${currentFormData.trestbps} mmHg
-- Heart Rate: ${currentFormData.thalach} bpm
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const margin = 36;
+        let y = 0;
+        let logoDataUrl = null;
 
-═══════════════════════════════════════
-IMPORTANT DISCLAIMER
-═══════════════════════════════════════
-This prediction is based on an ANN model for educational purposes.
-It is NOT a medical diagnosis and should NOT replace professional medical advice.
-Please consult with a qualified healthcare professional for proper evaluation.
+        const riskColor = statusLabel === 'HIGH RISK' ? [198, 40, 40] : statusLabel === 'MODERATE RISK' ? [245, 124, 0] : [46, 125, 50];
 
-═══════════════════════════════════════
-NEXT STEPS
-═══════════════════════════════════════
-1. Schedule an appointment with a cardiologist
-2. Discuss results with your primary care physician
-3. Follow the personalized health roadmap provided
-4. Monitor vital signs regularly
-5. Maintain a healthy lifestyle
+        try {
+            logoDataUrl = await loadImageAsDataUrl('./assets/images/cardioai-logo.svg');
+        } catch (error) {
+            console.warn('CardioAI logo could not be loaded for report header.', error);
+        }
 
-═══════════════════════════════════════
-For more information, visit your healthcare provider.
-    `;
+        // Header
+        pdf.setFillColor(24, 80, 162);
+        pdf.rect(0, 0, pageWidth, 92, 'F');
+
+        if (logoDataUrl) {
+            const logoBadgeWidth = 132;
+            const logoBadgeX = pageWidth - margin - logoBadgeWidth;
+            pdf.setFillColor(255, 255, 255);
+            pdf.roundedRect(logoBadgeX, 12, logoBadgeWidth, 30, 6, 6, 'F');
+            pdf.addImage(logoDataUrl, 'PNG', logoBadgeX + 6, 16, 118, 22);
+        }
+
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(22);
+        pdf.text('CardioAI Clinical Report', margin, 58);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(11);
+        pdf.text('Heart Disease Prediction Summary', margin, 74);
+        pdf.text(`Generated: ${reportDate}`, margin, 88);
+
+        // Risk summary card
+        y = 116;
+        pdf.setFillColor(248, 250, 252);
+        pdf.setDrawColor(223, 228, 234);
+        pdf.roundedRect(margin, y, pageWidth - margin * 2, 96, 8, 8, 'FD');
+        pdf.setTextColor(20, 20, 20);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(13);
+        pdf.text('Prediction Summary', margin + 16, y + 24);
+
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(12);
+        pdf.text(`Risk Level: ${Math.round(riskPercentage)}%`, margin + 16, y + 48);
+        pdf.text(`Model Confidence: ${Math.round(confidence)}%`, margin + 16, y + 68);
+
+        pdf.setFillColor(riskColor[0], riskColor[1], riskColor[2]);
+        pdf.roundedRect(pageWidth - margin - 170, y + 36, 150, 30, 6, 6, 'F');
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(11);
+        pdf.text(statusLabel, pageWidth - margin - 95, y + 56, { align: 'center' });
+
+        // Patient details
+        y = 234;
+        pdf.setTextColor(20, 20, 20);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(13);
+        pdf.text('Patient Input Data', margin, y);
+        y += 18;
+
+        pdf.setDrawColor(226, 232, 240);
+        pdf.setLineWidth(1);
+        pdf.line(margin, y, pageWidth - margin, y);
+        y += 18;
+
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(11);
+        patientData.forEach(([label, value]) => {
+            pdf.setTextColor(70, 70, 70);
+            pdf.text(`${label}:`, margin, y);
+            pdf.setTextColor(20, 20, 20);
+            pdf.text(value, margin + 120, y);
+            y += 20;
+        });
+
+        // Disclaimer block
+        y += 10;
+        pdf.setFillColor(255, 248, 230);
+        pdf.setDrawColor(255, 224, 178);
+        pdf.roundedRect(margin, y, pageWidth - margin * 2, 82, 6, 6, 'FD');
+        pdf.setTextColor(120, 74, 19);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(12);
+        pdf.text('Medical Disclaimer', margin + 12, y + 20);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(10);
+        const disclaimerLines = pdf.splitTextToSize(
+            'This prediction is generated by an ANN model for educational and screening support only. It is not a medical diagnosis. Please consult a qualified healthcare professional for proper clinical evaluation.',
+            pageWidth - margin * 2 - 24
+        );
+        pdf.text(disclaimerLines, margin + 12, y + 38);
+
+        // Next steps
+        y += 108;
+        pdf.setTextColor(20, 20, 20);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(12);
+        pdf.text('Recommended Next Steps', margin, y);
+        y += 18;
+
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(10.5);
+        const nextSteps = [
+            '1. Schedule an appointment with a cardiologist.',
+            '2. Discuss these findings with your primary care physician.',
+            '3. Follow your personalized prevention and monitoring plan.',
+            '4. Monitor blood pressure, cholesterol, and heart rate regularly.',
+            '5. Maintain consistent exercise, nutrition, and sleep habits.'
+        ];
+
+        nextSteps.forEach((step) => {
+            pdf.text(step, margin, y);
+            y += 16;
+        });
+
+        // Footer
+        pdf.setDrawColor(226, 232, 240);
+        pdf.line(margin, 796, pageWidth - margin, 796);
+        pdf.setTextColor(100, 100, 100);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(9);
+        pdf.text('CardioAI | Heart Disease Prediction Platform', margin, 812);
+        pdf.text('Page 1 of 1', pageWidth - margin, 812, { align: 'right' });
+
+        pdf.save('heart_disease_report_' + new Date().getTime() + '.pdf');
+        return;
+    }
+
+    // Fallback to text download when PDF library is unavailable.
+    const reportText = [
+        'CARDIOAI CLINICAL REPORT',
+        `Generated: ${reportDate}`,
+        '',
+        'Prediction Summary',
+        `Risk Level: ${Math.round(riskPercentage)}%`,
+        `Model Confidence: ${Math.round(confidence)}%`,
+        `Status: ${statusLabel}`,
+        '',
+        'Patient Input Data',
+        ...patientData.map(([label, value]) => `- ${label}: ${value}`),
+        '',
+        'Medical Disclaimer',
+        'This prediction is generated by an ANN model for educational and screening support only.',
+        'It is not a medical diagnosis. Please consult a qualified healthcare professional.',
+        '',
+        'Recommended Next Steps',
+        '1. Schedule an appointment with a cardiologist.',
+        '2. Discuss these findings with your primary care physician.',
+        '3. Follow your personalized prevention and monitoring plan.',
+        '4. Monitor blood pressure, cholesterol, and heart rate regularly.',
+        '5. Maintain consistent exercise, nutrition, and sleep habits.'
+    ].join('\n');
 
     const blob = new Blob([reportText], { type: 'text/plain' });
     const url = window.URL.createObjectURL(blob);
